@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import supabase from "./supabase-client";
 import { Chart } from "react-charts";
+import Form from "./Form";
 
 export default function Dashboard() {
   const [metrics, setMetrics] = useState([]);
@@ -101,6 +102,7 @@ export default function Dashboard() {
           />
         </div>
       </div>
+      <Form metrics={metrics} />
     </div>
   );
 }
