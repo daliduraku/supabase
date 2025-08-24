@@ -6,27 +6,44 @@ export default function Dashboard() {
   const [metrics, setMetrics] = useState([]);
 
   useEffect(() => {
-    async function fetchMetrics() {
-      try {
-        const { data, error } = await supabase.from("sales_deals").select(
-          `
-            name,
-            value.sum()
-            `
-        );
-        if (error) {
-          throw error;
-        }
-        console.log(data);
-        setMetrics(data);
-        console.log(error);
-      } catch (error) {
-        console.error("Caught an error:", error);
-      }
-    }
-
     fetchMetrics();
+
+    const channel = supabase
+      .channel("deal-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "sales_deals",
+        },
+        (payload) => {
+          fetchMetrics();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
+
+  async function fetchMetrics() {
+    try {
+      const { data, error } = await supabase.from("sales_deals").select(
+        `
+              name,
+              value.sum()
+              `
+      );
+      if (error) {
+        throw error;
+      }
+      setMetrics(data);
+    } catch (error) {
+      console.error("Caught an error:", error);
+    }
+  }
 
   const chartData = [
     {
