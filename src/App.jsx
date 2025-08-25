@@ -1,5 +1,5 @@
-import Header from "./Header";
-import Dashboard from "./Dashboard";
+import Header from "./components/Header";
+import Dashboard from "./routes/Dashboard";
 function App() {
   return (
     <>
