@@ -1,8 +1,10 @@
 import { useActionState } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const Signin = () => {
   const { signInUser } = useAuth();
+  const navigate = useNavigate();
 
   const [error, submitAction, isPending] = useActionState(
     async (previousState, formData) => {
@@ -19,7 +21,7 @@ const Signin = () => {
         return new Error(signInError);
       }
       if (success && data?.session) {
-        //Navigate to /dashboard
+        navigate("/dashboard");
         return null;
       }
       return null;
