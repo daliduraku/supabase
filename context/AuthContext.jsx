@@ -57,12 +57,13 @@ export const AuthContextProvider = ({ children }) => {
   // signout
   const signOut = async () => {
     try {
-      const { error } = supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
 
       if (error) {
         console.error("Supabase sign-out error:", error.message);
         return { success: false, error: error.message };
       }
+      return { success: true, error: null };
     } catch (error) {
       console.error("Unexpected error during sign-out:", error.message);
       return {
