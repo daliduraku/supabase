@@ -1,11 +1,11 @@
-import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Header() {
-  const { signOut } = useAuth();
-  const [error, setError] = useState(null);
+  const { signOut, session } = useAuth();
   const navigate = useNavigate();
+  const [error, setError] = useState(null);
 
   const handleSignOut = async (e) => {
     e.preventDefault();
@@ -26,14 +26,18 @@ function Header() {
           role="navigation"
           aria-label="User account navigation"
         >
-          <button onClick={handleSignOut} aria-label="Sign out of your account">
-            Sign out
-          </button>
+          <h2>
+            <span className="sr-only">Logged in as:</span>
+            {session?.user?.email}
+          </h2>
           {error && (
             <div role="role" className="error-message" id="signout-error">
               {error}
             </div>
           )}
+          <button onClick={handleSignOut} aria-label="Sign out of your account">
+            Sign out
+          </button>
         </div>
         <h1>
           <svg
