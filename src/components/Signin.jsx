@@ -1,31 +1,28 @@
 import { useActionState } from "react";
+import { useAuth } from "../context/AuthContext";
 
 const Signin = () => {
+  const { signInUser } = useAuth();
+
   const [error, submitAction, isPending] = useActionState(
     async (previousState, formData) => {
       const email = formData.get("email");
       const password = formData.get("password");
 
-      try {
-        //2. Call our sign-in function
-        // const {
-        //   success,
-        //   data,
-        //   error: signInError,
-        // } = await sign in function (email, password);
+      const {
+        success,
+        data,
+        error: signInError,
+      } = await signInUser(email, password);
 
-        if (signInError) {
-          return new Error(signInError);
-        }
-        if (success && data?.session) {
-          //Navigate to /dashboard
-          return null;
-        }
-        return null;
-      } catch (error) {
-        console.error("Sign in error: ", error.message);
-        return new Error("An unexpected error occurred. Please try again.");
+      if (signInError) {
+        return new Error(signInError);
       }
+      if (success && data?.session) {
+        //Navigate to /dashboard
+        return null;
+      }
+      return null;
     },
     null
   );
@@ -81,7 +78,7 @@ const Signin = () => {
 
           <button
             type="submit"
-            className="form-button"
+            disabled={isPending}
             className="form-button"
             aria-busy={isPending}
           >
