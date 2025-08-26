@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 const Signup = () => {
   return (
     <>
@@ -14,7 +16,12 @@ const Signup = () => {
           </div>
 
           <h2 className="form-title">Sign up today!</h2>
-          <p>Already have an account? Sign in</p>
+          <p>
+            Already have an account?
+            <Link className="form-link" to="/">
+              Sign in
+            </Link>
+          </p>
 
           <label htmlFor="email">Email</label>
           <input
