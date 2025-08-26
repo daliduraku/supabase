@@ -7,12 +7,14 @@ export const AuthContextProvider = ({ children }) => {
   // Session state (user info, sign-in status)
   const [session, setSession] = useState(undefined);
 
-  //1) check on 1st render for a session (getSession())
-
-  //2) Listen for changes in auth state
-
   useEffect(() => {
+    //1) check on 1st render for a session (getSession())
     getInitialSession();
+    //2) Listen for changes in auth state(.onauthstatechange())
+    supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      console.log("Session changed:", session);
+    });
   }, []);
 
   async function getInitialSession() {
