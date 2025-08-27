@@ -60,9 +60,9 @@ const Signup = () => {
             placeholder=""
             required
             aria-required="true"
-            //aria-invalid=
-            //aria-describedby=
-            //disabled=
+            aria-invalid={error ? "true" : "false"}
+            aria-describedby={error ? "signup-error" : undefined}
+            disabled={isPending}
           />
 
           <label htmlFor="password">Password</label>
@@ -74,22 +74,29 @@ const Signup = () => {
             placeholder=""
             required
             aria-required="true"
-            //aria-invalid=
-            //aria-describedby=
-            //disabled=
+            aria-invalid={error ? "true" : "false"}
+            aria-describedby={error ? "signup-error" : undefined}
+            disabled={isPending}
           />
 
           <button
             type="submit"
             className="form-button"
-            //disabled=
-            //aria-busy=
+            disabled={isPending}
+            aria-busy={isPending}
           >
-            Sign Up
-            {/*'Signing up...' when pending*/}
+            {isPending ? "Signing up..." : "Sign Up"}
           </button>
 
-          {/* Error message */}
+          {error && (
+            <div
+              id="signup-error"
+              role="alert"
+              className="sign-form-error-message"
+            >
+              {error.message}
+            </div>
+          )}
         </form>
       </div>
     </>
