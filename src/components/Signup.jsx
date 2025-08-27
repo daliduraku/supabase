@@ -1,12 +1,40 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { useActionState } from "react";
 
 const Signup = () => {
+  const { signUpNewUser } = useAuth();
+  const navigate = useNavigate();
+
+  const [error, submitAction, isPending] = useActionState(
+    async (previousState, formData) => {
+      const email = formData.get("email");
+      const password = formData.get("password");
+
+      const {
+        success,
+        data,
+        error: signUpError,
+      } = await signUpNewUser(email, password);
+
+      if (signUpError) {
+        return new Error(signUpError);
+      }
+      if (success && data?.session) {
+        navigate("/dashboard");
+        return null;
+      }
+      return null;
+    },
+    null
+  );
+
   return (
     <>
       <h1 className="landing-header">Paper Like A Boss</h1>
       <div className="sign-form-container">
         <form
-          // action={}
+          action={submitAction}
           aria-label="Sign up form"
           aria-describedby="form-description"
         >
