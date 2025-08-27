@@ -10,7 +10,7 @@ function Header() {
   const handleSignOut = async () => {
     const { success, error } = await signOut();
     if (success) {
-      navigate("/", { replace: true });
+      navigate("/signin", { replace: true });
     } else {
       setError(error?.message || "Sign out failed.");
     }
