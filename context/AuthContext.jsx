@@ -4,18 +4,33 @@ import supabase from "../src/supabase-client";
 const AuthContext = createContext();
 
 export const AuthContextProvider = ({ children }) => {
-  // Session state (user info, sign-in status)
+  //Session state (user info, sign-in status)
   const [session, setSession] = useState(undefined);
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    //1) check on 1st render for a session (getSession())
+    async function getInitialSession() {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (error) {
+          throw error;
+        }
+        setSession(data.session);
+      } catch (error) {
+        console.error("Error getting session:", error.message);
+      }
+    }
     getInitialSession();
-    //2) Listen for changes in auth state(.onauthstatechange())
+
     supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       console.log("Session changed:", session);
     });
+  }, []);
+
+  useEffect(() => {
+    if (!session) return;
+
     async function fetchUsers() {
       try {
         const { data, error } = await supabase
@@ -31,25 +46,9 @@ export const AuthContextProvider = ({ children }) => {
       }
     }
     fetchUsers();
-  }, []);
+  }, [session]);
 
-  async function getInitialSession() {
-    try {
-      const { data, error } = await supabase.auth.getSession();
-
-      if (error) {
-        throw error;
-      }
-
-      console.log(data.session);
-      setSession(data.session);
-    } catch (error) {
-      console.error("Error to get initial session", error.message);
-    }
-  }
-  // Auth functions (signin, signup, logout)
-
-  // signin
+  //Auth functions
   const signInUser = async (email, password) => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -63,7 +62,6 @@ export const AuthContextProvider = ({ children }) => {
       console.log("Supabase sign-in success:", data);
       return { success: true, data };
     } catch (error) {
-      //Unexpected error
       console.error("Unexpected error during sign-in:", error.message);
       return {
         success: false,
@@ -72,26 +70,23 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
-  // signout
   const signOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
-
       if (error) {
         console.error("Supabase sign-out error:", error.message);
         return { success: false, error: error.message };
       }
-      return { success: true, error: null };
+      return { success: true };
     } catch (error) {
       console.error("Unexpected error during sign-out:", error.message);
       return {
         success: false,
-        error: "An unexpected error occured. Please try again.",
+        error: "An unexpected error occurred during sign out.",
       };
     }
   };
 
-  // signup
   const signUpNewUser = async (email, password, name, accountType) => {
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -99,7 +94,7 @@ export const AuthContextProvider = ({ children }) => {
         password: password,
         options: {
           data: {
-            name,
+            name: name,
             account_type: accountType,
           },
         },
@@ -108,20 +103,20 @@ export const AuthContextProvider = ({ children }) => {
         console.error("Supabase sign-up error:", error.message);
         return { success: false, error: error.message };
       }
-      console.log("Supabase sign-up success:", data);
+      // console.log('Supabase sign-up success:', data);
       return { success: true, data };
     } catch (error) {
       console.error("Unexpected error during sign-up:", error.message);
       return {
         success: false,
-        error: "An unexpected error occured. Please try again.",
+        error: "An unexpected error occurred. Please try again.",
       };
     }
   };
 
   return (
     <AuthContext.Provider
-      value={{ session, signInUser, signOut, signUpNewUser }}
+      value={{ session, signInUser, signOut, signUpNewUser, users }}
     >
       {children}
     </AuthContext.Provider>

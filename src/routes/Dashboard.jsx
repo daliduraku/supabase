@@ -3,7 +3,7 @@ import supabase from "../supabase-client";
 import { Chart } from "react-charts";
 import Form from "../components/Form";
 
-export default function Dashboard() {
+function Dashboard() {
   const [metrics, setMetrics] = useState([]);
 
   useEffect(() => {
@@ -19,6 +19,7 @@ export default function Dashboard() {
           table: "sales_deals",
         },
         (payload) => {
+          console.log(payload);
           fetchMetrics();
         }
       )
@@ -33,16 +34,18 @@ export default function Dashboard() {
     try {
       const { data, error } = await supabase.from("sales_deals").select(
         `
-              name,
-              value.sum()
-              `
+          value.sum(),
+          ...user_profiles!inner(
+            name
+          )
+          `
       );
       if (error) {
         throw error;
       }
       setMetrics(data);
     } catch (error) {
-      console.error("Caught an error:", error);
+      console.error("Error fetching metrics:", error.message);
     }
   }
 
@@ -62,6 +65,14 @@ export default function Dashboard() {
     position: "bottom",
   };
 
+  function y_max() {
+    if (metrics.length > 0) {
+      const maxSum = Math.max(...metrics.map((m) => m.sum));
+      return maxSum + 2000;
+    }
+    return 5000;
+  }
+
   const secondaryAxes = [
     {
       getValue: (d) => d.secondary,
@@ -75,17 +86,17 @@ export default function Dashboard() {
     },
   ];
 
-  function y_max() {
-    if (metrics.length > 0) {
-      const maxSum = Math.max(...metrics.map((m) => m.sum));
-      return maxSum + 2000;
-    }
-    return 5000;
-  }
-
   return (
-    <div className="dashboard-wrapper">
-      <div className="chart-container">
+    <div
+      className="dashboard-wrapper"
+      role="region"
+      aria-label="Sales dashboard"
+    >
+      <div
+        className="chart-container"
+        role="region"
+        aria-label="Sales chart and data"
+      >
         <h2>Total Sales This Quarter ($)</h2>
         <div style={{ flex: 1 }}>
           <Chart
@@ -102,7 +113,9 @@ export default function Dashboard() {
           />
         </div>
       </div>
-      <Form metrics={metrics} />
+      <Form />
     </div>
   );
 }
+
+export default Dashboard;
